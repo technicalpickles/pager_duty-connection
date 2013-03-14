@@ -74,17 +74,14 @@ In general, you can get/put/post/delete a path, with some attributes. Use the [R
 
 If you are working in Rails, and using only a single PagerDuty account, you'll probably want an initializer:
 
-```ruby
-$pagerduty = PagerDuty::Connection.new('your-subdomain', 'your-token')
-```
+    $pagerduty = PagerDuty::Connection.new('your-subdomain', 'your-token')
 
 And if you are using [dotenv](https://github.com/bkeepers/dotenv), you can use environment variables, and stash them in .env:
 
-```ruby
-account = ENV['PAGERDUTY_ACCOUNT'] || raise("Missing ENV['PAGERDUTY_ACCOUNT'], add to .env")
-token = ENV['PAGERDUTY_TOKEN'] || raise("Missing ENV['PAGERDUTY_TOKEN'], add to .env.#{Rails.env}")
-$pagerduty = PagerDuty::Connection.new(account, token)
-```
+
+    account = ENV['PAGERDUTY_ACCOUNT'] || raise("Missing ENV['PAGERDUTY_ACCOUNT'], add to .env")
+    token = ENV['PAGERDUTY_TOKEN'] || raise("Missing ENV['PAGERDUTY_TOKEN'], add to .env.#{Rails.env}")
+    $pagerduty = PagerDuty::Connection.new(account, token)
 
 ## Questions and Answers
 
