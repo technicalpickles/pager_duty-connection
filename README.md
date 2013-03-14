@@ -86,6 +86,28 @@ token = ENV['PAGERDUTY_TOKEN'] || raise("Missing ENV['PAGERDUTY_TOKEN'], add to 
 $pagerduty = PagerDuty::Connection.new(account, token)
 ``
 
+## Questions and Answers
+
+> What about the [pagerduty](https://github.com/envato/pagerduty) gem?
+
+That is only for PagerDuty's [Integration API](http://developer.pagerduty.com/documentation/integration/events), ie for triggering/acknowleding/resolinv incidents
+
+> What about the [pagerduty-full](https://github.com/gphat/pagerduty-full) gem?
+
+It tries to be too clever and tightly models the API. For exampe, by having only Incident & Schedule classes, with specific methods for doing specific API calls, it means having to update the gem anytime new resources are added, and new API methods.
+
+> What about [pagerduty_tools](https://github.com/precipice/pagerduty_tools)
+
+That gem is less about being an API, and more about tools for being on call. Also, it took months for [my pull request to be reviewed](https://github.com/precipice/pagerduty_tools/pull/6), so didn't give me a lot of hope for changes making it in.
+
+> Why not name it pagerduty-rest?
+
+That would suggest a constant like Pagerduty::Rest, which I didn't like
+
+> Why not name it pagerduty-connection?
+
+That would suggest a constant like Pagerduty::Connection
+
 ## Contributing
 
 1. Fork it
