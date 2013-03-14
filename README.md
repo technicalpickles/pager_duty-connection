@@ -21,7 +21,7 @@ In the end, this is what it does:
 And this is what it doesn't do:
 
 * provide first class objects for Incidents, Services, etc (they can change, and have new methods)
-* provide an a ActiveResource interface (ActiveResource libraries can be hard to built wrappers for. Also, it's not conducive to accessing multiple pagerduty accounts)
+* provide an a ActiveResource interface (ActiveResource libraries can be hard to build wrappers for. Also, it's not conducive to accessing multiple pagerduty accounts)
 * have methods for individual API calls that are possible (ie `find_incident`, `list_users`, etc)
 * provide [will_paginate](https://github.com/mislav/will_paginate) or [kaminari](https://github.com/amatsuda/kaminari) paginated arrays (They aren't super documented for building a library that works well with them, and have different APIs)
 
