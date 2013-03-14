@@ -94,7 +94,7 @@ That is only for PagerDuty's [Integration API](http://developer.pagerduty.com/do
 
 > What about the [pagerduty-full](https://github.com/gphat/pagerduty-full) gem?
 
-It tries to be too clever and tightly models the API. For exampe, by having only Incident & Schedule classes, with specific methods for doing specific API calls, it means having to update the gem anytime new resources are added, and new API methods.
+It tries to be too clever and tightly models the API. For example, by having only Incident & Schedule classes, with specific methods for doing specific API calls, it means having to update the gem anytime new resources are added, and new API methods.
 
 > What about [pagerduty_tools](https://github.com/precipice/pagerduty_tools)
 
@@ -106,7 +106,11 @@ That would suggest a constant like Pagerduty::Rest, which I didn't like
 
 > Why not name it pagerduty-connection?
 
-That would suggest a constant like Pagerduty::Connection
+That would suggest a constant like Pagerduty::Connection, where the company is called PagerDuty.
+
+> Why the 'connection' thing?
+
+It's an homage to [faraday](https://github.com/lostisland/faraday), which this library uses.
 
 ## Contributing
 
