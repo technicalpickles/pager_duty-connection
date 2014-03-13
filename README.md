@@ -50,10 +50,10 @@ pagerduty = PagerDuty::Connection.new(account, token)
 
 # 4 main methods: get, post, put, and delete:
 
-response = pagerduty.get('some/relative/path', :some => 'request', :parameter => 'to pass'
-response = pagerduty.post('some/relative/path', :some => 'request', :parameter => 'to pass'
-response = pagerduty.delete('some/relative/path', :some => 'request', :parameter => 'to pass'
-response = pagerduty.put('some/relative/path', :some => 'request', :parameter => 'to pass'
+response = pagerduty.get('some/relative/path', :some => 'request', :parameter => 'to pass')
+response = pagerduty.post('some/relative/path', :some => 'request', :parameter => 'to pass')
+response = pagerduty.delete('some/relative/path', :some => 'request', :parameter => 'to pass')
+response = pagerduty.put('some/relative/path', :some => 'request', :parameter => 'to pass')
 
 # use something like irb or pry to poke around the responses
 # the contents will vary a bit between call, ie:
