@@ -29,7 +29,7 @@ module PagerDuty
     class RaiseApiErrorOnNon200 < Faraday::Middleware
       def call(env)
         response = @app.call env
-        if response.status != 200
+        unless [200, 201, 204].include?(response.status)
           url = response.env[:url].to_s
           if error = response.body['error']
             # TODO May Need to check error.errors too
