@@ -68,13 +68,15 @@ module PagerDuty
       def call(env)
         response = @app.call env
 
-        OBJECT_KEYS.each do |key|
-          object = env[:body][key]
-          parse_object_times(object) if object
-          
-          collection_key = key.pluralize
-          collection = env[:body][collection_key]
-          parse_collection_times(collection) if collection
+        if env[:body]
+          OBJECT_KEYS.each do |key|
+            object = env[:body][key]
+            parse_object_times(object) if object
+
+            collection_key = key.pluralize
+            collection = env[:body][collection_key]
+            parse_collection_times(collection) if collection
+          end
         end
 
         response
