@@ -133,7 +133,7 @@ module PagerDuty
     end
 
     def post(path, options = {})
-      run_request(:put, path, options)
+      run_request(:post, path, options)
     end
 
     def delete(path, options = {})
