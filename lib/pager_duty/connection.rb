@@ -61,9 +61,28 @@ module PagerDuty
     end
 
     class ParseTimeStrings < Faraday::Middleware
-      TIME_KEYS = %w(start end created_on last_status_change_on started_at created_at last_incident_timestamp)
+      TIME_KEYS = %w(
+        created_at
+        created_on
+        end
+        end_time
+        last_incident_timestamp
+        last_status_change_on
+        start
+        started_at
+        start_time
+      )
 
-      OBJECT_KEYS = %w(override entry incident alert service)
+      OBJECT_KEYS = %w(
+        alert
+        entry
+        incident
+        log_entry
+        maintenance_window
+        note
+        override
+        service
+      )
 
       def call(env)
         response = @app.call env
