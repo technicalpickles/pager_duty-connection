@@ -125,12 +125,12 @@ module PagerDuty
         conn.token_auth token
 
 
-        conn.use ParseTimeStrings
         conn.use RaiseApiErrorOnNon200
+        conn.use RaiseFileNotFoundOn404
         # json back, mashify it
         conn.response :mashify
         conn.response :json, :content_type => /\bjson$/
-        conn.use RaiseFileNotFoundOn404
+        conn.use ParseTimeStrings
 
         conn.use ConvertTimesParametersToISO8601 
         # use json
