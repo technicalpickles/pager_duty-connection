@@ -31,12 +31,13 @@ module PagerDuty
         response = @app.call env
         unless [200, 201, 204].include?(response.status)
           url = response.env[:url].to_s
+          message = "Got HTTP #{response['status']} back for #{url}"
           if error = response.body['error']
             # TODO May Need to check error.errors too
-            raise ApiError, "Got HTTP #{response['status']} back for #{url}. Error code #{error['code']}: #{error['message']}"
-          else
-            raise ApiError, "Got HTTP #{response['status']} back for #{url}."
+            message += "\n#{error.to_hash}"
           end
+
+          raise ApiError, message
         else
           response
         end
