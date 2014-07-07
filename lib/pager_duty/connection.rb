@@ -90,11 +90,11 @@ module PagerDuty
         if env[:body]
           OBJECT_KEYS.each do |key|
             object = env[:body][key]
-            parse_object_times(object) if object
+            parse_object_times(object) if object && object.respond_to?(:has_key?)
 
             collection_key = key.pluralize
             collection = env[:body][collection_key]
-            parse_collection_times(collection) if collection
+            parse_collection_times(collection) if collection && collection.respond_to?(:each)
           end
         end
 
