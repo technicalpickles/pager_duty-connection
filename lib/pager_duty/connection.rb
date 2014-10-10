@@ -61,7 +61,7 @@ module PagerDuty
 
     end
 
-    class ParseTimeStrings < Faraday::Middleware
+    class ParseTimeStrings < Faraday::Response::Middleware
       TIME_KEYS = %w(
         created_at
         created_on
@@ -85,21 +85,22 @@ module PagerDuty
         service
       )
 
-      def call(env)
-        response = @app.call env
-
-        if env[:body]
+      def parse(body)
+        case body
+        when Hash, ::Hashie::Mash
           OBJECT_KEYS.each do |key|
-            object = env[:body][key]
+            object = body[key]
             parse_object_times(object) if object
 
             collection_key = key.pluralize
-            collection = env[:body][collection_key]
+            collection = body[collection_key]
             parse_collection_times(collection) if collection
           end
-        end
 
-        response
+          body
+        else
+          raise "Can't parse times of #{body.class}: #{body}"
+        end
       end
 
       def parse_collection_times(collection)
@@ -112,7 +113,9 @@ module PagerDuty
         time = Time.zone ? Time.zone : Time
 
         TIME_KEYS.each do |key|
-          object[key] = time.parse(object[key]) if object.has_key?(key)
+          if object.has_key?(key) && object[key].present?
+            object[key] = time.parse(object[key])
+          end
         end
       end
     end
@@ -125,17 +128,18 @@ module PagerDuty
         # use token authentication: http://developer.pagerduty.com/documentation/rest/authentication
         conn.token_auth token
 
-
-        conn.use ParseTimeStrings
         conn.use RaiseApiErrorOnNon200
-        # json back, mashify it
-        conn.response :mashify
-        conn.response :json, :content_type => /\bjson$/
         conn.use RaiseFileNotFoundOn404
 
         conn.use ConvertTimesParametersToISO8601 
+
         # use json
         conn.request :json
+
+        # json back, mashify it
+        conn.use ParseTimeStrings
+        conn.response :mashify
+        conn.response :json
 
         conn.adapter  Faraday.default_adapter
       end
