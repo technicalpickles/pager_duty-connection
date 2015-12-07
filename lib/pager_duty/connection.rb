@@ -1,5 +1,6 @@
 require 'faraday'
 require 'faraday_middleware'
+require 'active_support'
 require 'active_support/core_ext'
 require 'active_support/time_with_zone'
 
@@ -50,7 +51,7 @@ module PagerDuty
 
         body = env[:body]
         TIME_KEYS.each do |key|
-          if body.has_key?(key) 
+          if body.has_key?(key)
             body[key] = body[key].iso8601 if body[key].respond_to?(:iso8601)
           end
         end
@@ -131,7 +132,7 @@ module PagerDuty
         conn.use RaiseApiErrorOnNon200
         conn.use RaiseFileNotFoundOn404
 
-        conn.use ConvertTimesParametersToISO8601 
+        conn.use ConvertTimesParametersToISO8601
 
         # use json
         conn.request :json
