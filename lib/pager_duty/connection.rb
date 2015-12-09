@@ -45,7 +45,7 @@ module PagerDuty
       end
     end
 
-    class ConvertTimesParametersToISO8601  < Faraday::Middleware
+    class ConvertTimesParametersToISO8601 < Faraday::Middleware
       TIME_KEYS = [:since, :until]
       def call(env)
 
@@ -58,12 +58,11 @@ module PagerDuty
 
         response = @app.call env
       end
-
-
     end
 
     class ParseTimeStrings < Faraday::Response::Middleware
       TIME_KEYS = %w(
+        at
         created_at
         created_on
         end
@@ -84,6 +83,12 @@ module PagerDuty
         note
         override
         service
+      )
+
+      NESTED_COLLECTION_KEYS = %w(
+        acknowledgers
+        assigned_to
+        pending_actions
       )
 
       def parse(body)
@@ -107,6 +112,11 @@ module PagerDuty
       def parse_collection_times(collection)
         collection.each do |object|
           parse_object_times(object)
+
+          NESTED_COLLECTION_KEYS.each do |key|
+            object_collection = object[key]
+            parse_collection_times(object_collection) if object_collection
+          end
         end
       end
 
