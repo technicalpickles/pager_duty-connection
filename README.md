@@ -46,14 +46,14 @@ Working code is worth a thousand words. The basics:
 
 ```ruby
 # setup the connection
-pagerduty = PagerDuty::Connection.new(account, token)
+pagerduty = PagerDuty::Connection.new(token, version)
 
-# 4 main methods: get, post, put, and delete:
+# 4 main methods: `get`, `post`, `put`, and `delete`:
 
-response = pagerduty.get('some/relative/path', :some => 'request', :parameter => 'to pass')
-response = pagerduty.post('some/relative/path', :some => 'request', :parameter => 'to pass')
-response = pagerduty.delete('some/relative/path', :some => 'request', :parameter => 'to pass')
-response = pagerduty.put('some/relative/path', :some => 'request', :parameter => 'to pass')
+response = pagerduty.get('some/relative/path', params)
+response = pagerduty.post('some/relative/path', params)
+response = pagerduty.delete('some/relative/path', params)
+response = pagerduty.put('some/relative/path', params)
 
 # use something like irb or pry to poke around the responses
 # the contents will vary a bit between call, ie:
@@ -63,6 +63,25 @@ response.incidents # an array of incidents
 
 response = pagerduty.get('incidents/YYZ')
 response # the hash/object that represents the array
+```
+
+`get`, `post`, `put`, and `delete` all take a common parameter `params`.
+This parameter contains the query parameters, body, and custom headers
+needed to perform the request. Params is structured as follows:
+
+```ruby
+params = {
+  query_params: {
+    param1: "ABCD",
+    ids: [ "id1", "id2", "id3" ] # Faraday takes care of encoding the arrays to be `?ids[]=id1&ids[]=id2&ids[]=id3..`
+  }, {
+    body: { ... }, # Whatever needs to be sent in a `PUT` or `POST` request body
+  }, {
+    headers: {
+      from: "testuser@test.com" # Some requests require a From header
+    }
+  }
+}
 ```
 
 For more advanced and realistic examples, check out the examples directory:

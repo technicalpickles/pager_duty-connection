@@ -16,6 +16,9 @@ module PagerDuty
     class ApiError < RuntimeError
     end
 
+    class RateLimitError < RuntimeError
+    end
+
     class RaiseFileNotFoundOn404 < Faraday::Middleware
       def call(env)
         response = @app.call env
@@ -42,6 +45,17 @@ module PagerDuty
         else
           response
         end
+      end
+    end
+
+    class RaiseRateLimitOn429 < Faraday::Middleware
+      def call(env)
+        response = @app.call env
+        if response.status == 429
+          raise RateLimitError, response.env[:url].to_s
+        end
+
+        response
       end
     end
 
@@ -131,58 +145,64 @@ module PagerDuty
       end
     end
 
-    def initialize(account, token, api_version = 1)
+    def initialize(token, api_version, debug: false)
       @api_version = api_version
       @connection = Faraday.new do |conn|
-        conn.url_prefix = "https://#{account}.pagerduty.com/api/v#{api_version}"
+        conn.url_prefix = "https://api.pagerduty.com/"
 
         # use token authentication: http://developer.pagerduty.com/documentation/rest/authentication
         conn.token_auth token
 
         conn.use RaiseApiErrorOnNon200
         conn.use RaiseFileNotFoundOn404
+        conn.use RaiseRateLimitOn429
 
         conn.use ConvertTimesParametersToISO8601
 
         # use json
         conn.request :json
+        conn.headers[:accept] = "application/vnd.pagerduty+json;version=#{api_version}"
 
         # json back, mashify it
         conn.use ParseTimeStrings
         conn.response :mashify
         conn.response :json
+        conn.response :logger, ::Logger.new(STDOUT), bodies: true if debug
 
         conn.adapter  Faraday.default_adapter
       end
     end
 
-    def get(path, options = {})
-      # paginate anything being 'get'ed, because the offset/limit isn't intutive
-      page = (options.delete(:page) || 1).to_i
-      limit = (options.delete(:limit) || 100).to_i
+    def get(path, params = {})
+      # paginate anything being 'get'ed, because the offset/limit isn't intuitive
+      page = (params[:query_params].delete(:page) || 1).to_i
+      limit = (params[:query_params].delete(:limit) || 100).to_i
       offset = (page - 1) * limit
+      params[:query_params].merge(offset: offset, limit: limit)
 
-      run_request(:get, path, options.merge(:offset => offset, :limit => limit))
+      run_request(:get, path, params)
     end
 
-    def put(path, options = {})
-      run_request(:put, path, options)
+    def put(path, params = {})
+      run_request(:put, path, params)
     end
 
-    def post(path, options = {})
-      run_request(:post, path, options)
+    def post(path, params = {})
+      run_request(:post, path, params)
     end
 
-    def delete(path, options = {})
-      run_request(:delete, path, options)
+    def delete(path, params = {})
+      run_request(:delete, path, params)
     end
 
-    def run_request(method, path, options)
+    private
+
+    def run_request(method, path, body: {}, headers: {}, query_params: {})
       path = path.gsub(/^\//, '') # strip leading slash, to make sure relative things happen on the connection
-      headers = nil
-      response = connection.run_request(method, path, options, headers)
+
+      connection.params = query_params
+      response = connection.run_request(method, path, body, headers)
       response.body
     end
-
   end
 end
