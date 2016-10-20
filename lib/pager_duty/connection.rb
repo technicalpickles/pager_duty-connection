@@ -8,7 +8,8 @@ module PagerDuty
 
   class Connection
     attr_accessor :connection
-    attr_accessor :api_version
+
+    API_VERSION = 2
 
     class FileNotFoundError < RuntimeError
     end
@@ -70,7 +71,7 @@ module PagerDuty
           end
         end
 
-        response = @app.call env
+        @app.call env
       end
     end
 
@@ -145,8 +146,7 @@ module PagerDuty
       end
     end
 
-    def initialize(token, api_version, debug: false)
-      @api_version = api_version
+    def initialize(token, debug: false)
       @connection = Faraday.new do |conn|
         conn.url_prefix = "https://api.pagerduty.com/"
 
@@ -161,7 +161,7 @@ module PagerDuty
 
         # use json
         conn.request :json
-        conn.headers[:accept] = "application/vnd.pagerduty+json;version=#{api_version}"
+        conn.headers[:accept] = "application/vnd.pagerduty+json;version=#{API_VERSION}"
 
         # json back, mashify it
         conn.use ParseTimeStrings
@@ -173,26 +173,27 @@ module PagerDuty
       end
     end
 
-    def get(path, params = {})
+    def get(path, request = {})
       # paginate anything being 'get'ed, because the offset/limit isn't intuitive
-      page = (params[:query_params].delete(:page) || 1).to_i
-      limit = (params[:query_params].delete(:limit) || 100).to_i
+      request[:query_params] = {} if !request[:query_params]
+      page = (request[:query_params].delete(:page) || 1).to_i
+      limit = (request[:query_params].delete(:limit) || 100).to_i
       offset = (page - 1) * limit
-      params[:query_params].merge(offset: offset, limit: limit)
+      request[:query_params] = request[:query_params].merge(offset: offset, limit: limit)
 
-      run_request(:get, path, params)
+      run_request(:get, path, request)
     end
 
-    def put(path, params = {})
-      run_request(:put, path, params)
+    def put(path, request = {})
+      run_request(:put, path, request)
     end
 
-    def post(path, params = {})
-      run_request(:post, path, params)
+    def post(path, request = {})
+      run_request(:post, path, request)
     end
 
-    def delete(path, params = {})
-      run_request(:delete, path, params)
+    def delete(path, request = {})
+      run_request(:delete, path, request)
     end
 
     private

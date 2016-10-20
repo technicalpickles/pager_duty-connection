@@ -25,6 +25,8 @@ And this is what it doesn't do:
 * have methods for individual API calls that are possible (ie `find_incident`, `list_users`, etc)
 * provide [will_paginate](https://github.com/mislav/will_paginate) or [kaminari](https://github.com/amatsuda/kaminari) paginated arrays (They aren't super documented for building a library that works well with them, and have different APIs)
 
+**Note**: v1 of the Pager Duty REST API is no longer supported with this gem. Please either upgrade to v2 of the API [(v2 Migration Documentation)](https://v2.developer.pagerduty.com/docs/migrating-to-api-v2) or do not upgrade past version 0.2.0 of this gem.
+
 ## Installation
 
 Add this line to your application's Gemfile:
