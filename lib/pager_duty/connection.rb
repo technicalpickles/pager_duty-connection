@@ -146,12 +146,12 @@ module PagerDuty
       end
     end
 
-    def initialize(token, debug: false)
+    def initialize(token, token_type: :Token, debug: false)
       @connection = Faraday.new do |conn|
         conn.url_prefix = "https://api.pagerduty.com/"
 
         # use token authentication: http://developer.pagerduty.com/documentation/rest/authentication
-        conn.token_auth token
+        conn.authorization(token_type, token)
 
         conn.use RaiseApiErrorOnNon200
         conn.use RaiseFileNotFoundOn404

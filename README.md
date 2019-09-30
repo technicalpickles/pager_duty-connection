@@ -47,8 +47,11 @@ Or install it yourself as:
 Working code is worth a thousand words. The basics:
 
 ```ruby
-# setup the connection
+# setup the connection with API token
 pagerduty = PagerDuty::Connection.new(token)
+
+# setup the connection with OAuth2 token
+pagerduty = PagerDuty::Connection.new(token, :Bearer)
 
 # 4 main methods: `get`, `post`, `put`, and `delete`:
 
