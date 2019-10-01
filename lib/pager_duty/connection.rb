@@ -150,7 +150,6 @@ module PagerDuty
       @connection = Faraday.new do |conn|
         conn.url_prefix = "https://api.pagerduty.com/"
 
-        # use token authentication: http://developer.pagerduty.com/documentation/rest/authentication
         conn.authorization(token_type, token)
 
         conn.use RaiseApiErrorOnNon200
