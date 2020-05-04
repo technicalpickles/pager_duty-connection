@@ -51,7 +51,7 @@ Working code is worth a thousand words. The basics:
 pagerduty = PagerDuty::Connection.new(token)
 
 # setup the connection with OAuth2 token
-pagerduty = PagerDuty::Connection.new(token, :Bearer)
+pagerduty = PagerDuty::Connection.new(token, token_type: :Bearer)
 
 # 4 main methods: `get`, `post`, `put`, and `delete`:
 
