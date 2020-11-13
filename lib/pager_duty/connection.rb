@@ -158,10 +158,6 @@ module PagerDuty
           end
         conn.authorization(token_type, token_arg)
 
-        conn.use RaiseApiErrorOnNon200
-        conn.use RaiseFileNotFoundOn404
-        conn.use RaiseRateLimitOn429
-
         conn.use ConvertTimesParametersToISO8601
 
         # use json
@@ -173,6 +169,13 @@ module PagerDuty
         conn.response :mashify
         conn.response :json
         conn.response :logger, ::Logger.new(STDOUT), bodies: true if debug
+
+        # Because Faraday::Middleware executes in reverse order of
+        # calls to conn.use, status code error handling goes at the
+        # end of the block so that it runs first
+        conn.use RaiseApiErrorOnNon200
+        conn.use RaiseFileNotFoundOn404
+        conn.use RaiseRateLimitOn429
 
         conn.adapter  Faraday.default_adapter
       end
