@@ -39,7 +39,12 @@ module PagerDuty
           message = "Got HTTP #{response['status']} back for #{url}"
           if error = response.body['error']
             # TODO May Need to check error.errors too
-            message += "\n#{error.to_hash}"
+			begin
+			  message += "\n#{error.to_hash}"
+			rescue NoMethodError => e
+			  message += error
+			end
+
           end
 
           raise ApiError, message
