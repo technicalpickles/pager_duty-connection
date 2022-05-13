@@ -53,6 +53,9 @@ pagerduty = PagerDuty::Connection.new(token)
 # setup the connection with OAuth2 token
 pagerduty = PagerDuty::Connection.new(token, token_type: :Bearer)
 
+# setup to use a custom domain
+pagerduty = PagerDuty::Connection.new(token, token_type: :Bearer, url: 'https://custom.domain.com')
+
 # 4 main methods: `get`, `post`, `put`, and `delete`:
 
 response = pagerduty.get('some/relative/path', params)
