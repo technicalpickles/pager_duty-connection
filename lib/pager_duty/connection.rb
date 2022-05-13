@@ -10,6 +10,7 @@ module PagerDuty
     attr_accessor :connection
 
     API_VERSION = 2
+    API_PREFIX = "https://api.pagerduty.com/"
 
     class FileNotFoundError < RuntimeError
     end
@@ -149,9 +150,9 @@ module PagerDuty
       end
     end
 
-    def initialize(token, token_type: :Token, debug: false)
+    def initialize(token, token_type: :Token, url: API_PREFIX, debug: false)
       @connection = Faraday.new do |conn|
-        conn.url_prefix = "https://api.pagerduty.com/"
+        conn.url_prefix = url
 
         token_arg =
           case token_type
@@ -187,12 +188,13 @@ module PagerDuty
     def get(path, request = {})
       # paginate anything being 'get'ed, because the offset/limit isn't intuitive
       request[:query_params] = {} if !request[:query_params]
-      page = (request[:query_params].delete(:page) || 1).to_i
-      limit = (request[:query_params].delete(:limit) || 100).to_i
+      page = request[:query_params].fetch(:page, 1).to_i
+      limit = request[:query_params].fetch(:limit, 100).to_i
       offset = (page - 1) * limit
-      request[:query_params] = request[:query_params].merge(offset: offset, limit: limit)
 
-      run_request(:get, path, **request)
+      query_params = request[:query_params].merge(offset: offset, limit: limit)
+
+      run_request(:get, path, **request.merge(query_params: query_params))
     end
 
     def put(path, request = {})
