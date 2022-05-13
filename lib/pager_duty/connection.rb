@@ -10,6 +10,7 @@ module PagerDuty
     attr_accessor :connection
 
     API_VERSION = 2
+    API_PREFIX = "https://api.pagerduty.com/"
 
     class FileNotFoundError < RuntimeError
     end
@@ -149,9 +150,9 @@ module PagerDuty
       end
     end
 
-    def initialize(token, token_type: :Token, debug: false)
+    def initialize(token, token_type: :Token, url: API_PREFIX, debug: false)
       @connection = Faraday.new do |conn|
-        conn.url_prefix = "https://api.pagerduty.com/"
+        conn.url_prefix = url
 
         token_arg =
           case token_type
