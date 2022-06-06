@@ -1,5 +1,4 @@
 require 'faraday'
-require 'faraday_middleware'
 require 'active_support'
 require 'active_support/core_ext'
 require 'active_support/time_with_zone'
