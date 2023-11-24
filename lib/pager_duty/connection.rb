@@ -12,14 +12,38 @@ module PagerDuty
     API_VERSION = 2
     API_PREFIX = "https://api.pagerduty.com/"
 
-    class FileNotFoundError < RuntimeError
+    class FileNotFoundError < RuntimeError; end
+
+    class ApiError < RuntimeError; end
+
+    class RateLimitError < RuntimeError; end
+
+    class UnauthorizedError < RuntimeError; end
+
+    class ForbiddenError < RuntimeError; end
+
+    class RaiseUnauthorizedOn401 < Faraday::Middleware
+      def call(env)
+        response = @app.call(env)
+        if response.status == 401
+          raise PagerDuty::Connection::UnauthorizedError, response.env[:url].to_s
+        else
+          response
+        end
+      end
     end
 
-    class ApiError < RuntimeError
+    class RaiseForbiddenOn403 < Faraday::Middleware
+      def call(env)
+        response = @app.call(env)
+        if response.status == 403
+          raise PagerDuty::Connection::ForbiddenError, response.env[:url].to_s
+        else
+          response
+        end
+      end
     end
 
-    class RateLimitError < RuntimeError
-    end
 
     class RaiseFileNotFoundOn404 < Faraday::Middleware
       def call(env)
@@ -40,10 +64,13 @@ module PagerDuty
           message = "Got HTTP #{response.status}: #{response.reason_phrase}\nFrom #{url}"
 
           if error = response.body
-            # TODO May Need to check error.errors too
-            message += "\n#{JSON.parse(error)}"
+            begin
+              # TODO May Need to check error.errors too
+              message += "\n#{JSON.parse(error)}"
+            rescue JSON::ParserError
+              message += "\n#{error}"
+            end
           end
-
           raise ApiError, message
         else
           response
@@ -180,6 +207,8 @@ module PagerDuty
         conn.use RaiseApiErrorOnNon200
         conn.use RaiseFileNotFoundOn404
         conn.use RaiseRateLimitOn429
+        conn.use RaiseForbiddenOn403
+        conn.use RaiseUnauthorizedOn401
 
         conn.adapter  Faraday.default_adapter
       end
