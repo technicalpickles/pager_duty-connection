@@ -67,9 +67,11 @@ module PagerDuty
       def call(env)
 
         body = env[:body]
-        TIME_KEYS.each do |key|
-          if body.has_key?(key)
-            body[key] = body[key].iso8601 if body[key].respond_to?(:iso8601)
+        unless body.nil?
+          TIME_KEYS.each do |key|
+            if body.has_key?(key)
+              body[key] = body[key].iso8601 if body[key].respond_to?(:iso8601)
+            end
           end
         end
 
@@ -186,6 +188,12 @@ module PagerDuty
     end
 
     def get(path, request = {})
+      # The run_request() method body argument defaults to {}, which is incorrect for GET requests
+      # https://github.com/technicalpickles/pager_duty-connection/issues/56
+      # NOTE: PagerDuty support discourages GET requests with bodies, but not throwing an ArgumentError to prevent breaking
+      #   corner-case implementations.
+      request[:body] = nil if !request[:body]
+
       # paginate anything being 'get'ed, because the offset/limit isn't intuitive
       request[:query_params] = {} if !request[:query_params]
       page = request[:query_params].fetch(:page, 1).to_i
