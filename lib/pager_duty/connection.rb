@@ -230,6 +230,7 @@ module PagerDuty
       offset = (page - 1) * limit
 
       query_params = request[:query_params].merge(offset: offset, limit: limit)
+      query_params.delete(:page)
 
       run_request(:get, path, **request.merge(query_params: query_params))
     end
