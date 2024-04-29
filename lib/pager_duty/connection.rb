@@ -1,11 +1,10 @@
-require 'faraday'
-require 'hashie'
-require 'active_support'
-require 'active_support/core_ext'
-require 'active_support/time_with_zone'
+require "faraday"
+require "hashie"
+require "active_support"
+require "active_support/core_ext"
+require "active_support/time_with_zone"
 
 module PagerDuty
-
   class Connection
     attr_accessor :connection
 
@@ -44,7 +43,6 @@ module PagerDuty
       end
     end
 
-
     class RaiseFileNotFoundOn404 < Faraday::Middleware
       def call(env)
         response = @app.call env
@@ -59,11 +57,13 @@ module PagerDuty
     class RaiseApiErrorOnNon200 < Faraday::Middleware
       def call(env)
         response = @app.call env
-        unless [200, 201, 204].include?(response.status)
+        if [200, 201, 204].include?(response.status)
+          response
+        else
           url = response.env[:url].to_s
           message = "Got HTTP #{response.status}: #{response.reason_phrase}\nFrom #{url}"
 
-          if error = response.body
+          if (error = response.body)
             begin
               # TODO May Need to check error.errors too
               message += "\n#{JSON.parse(error)}"
@@ -72,8 +72,6 @@ module PagerDuty
             end
           end
           raise ApiError, message
-        else
-          response
         end
       end
     end
@@ -92,7 +90,6 @@ module PagerDuty
     class ConvertTimesParametersToISO8601 < Faraday::Middleware
       TIME_KEYS = [:since, :until]
       def call(env)
-
         body = env[:body]
         unless body.nil?
           TIME_KEYS.each do |key|
@@ -107,7 +104,7 @@ module PagerDuty
     end
 
     class ParseTimeStrings < Faraday::Middleware
-      TIME_KEYS = %w(
+      TIME_KEYS = %w[
         at
         created_at
         created_on
@@ -118,9 +115,9 @@ module PagerDuty
         start
         started_at
         start_time
-      )
+      ]
 
-      OBJECT_KEYS = %w(
+      OBJECT_KEYS = %w[
         alert
         entry
         incident
@@ -129,13 +126,13 @@ module PagerDuty
         note
         override
         service
-      )
+      ]
 
-      NESTED_COLLECTION_KEYS = %w(
+      NESTED_COLLECTION_KEYS = %w[
         acknowledgers
         assigned_to
         pending_actions
-      )
+      ]
 
       def on_complete(env)
         parse(env[:body])
@@ -173,7 +170,7 @@ module PagerDuty
       end
 
       def parse_object_times(object)
-        time = Time.zone ? Time.zone : Time
+        time = Time.zone || Time
 
         TIME_KEYS.each do |key|
           if object.has_key?(key) && object[key].present?
@@ -209,10 +206,10 @@ module PagerDuty
           if faraday_v1?
             conn.request :token_auth, token
           else
-            conn.request :authorization, 'Token', token
+            conn.request :authorization, "Token", token
           end
         when :Bearer
-          conn.request :authorization, 'Bearer', token
+          conn.request :authorization, "Bearer", token
         else raise ArgumentError, "invalid token_type: #{token_type.inspect}"
         end
 
@@ -226,7 +223,7 @@ module PagerDuty
         conn.use ParseTimeStrings
         conn.use Mashify
         conn.response :json
-        conn.response :logger, ::Logger.new(STDOUT), bodies: true if debug
+        conn.response :logger, ::Logger.new($stdout), bodies: true if debug
 
         # Because Faraday::Middleware executes in reverse order of
         # calls to conn.use, status code error handling goes at the
@@ -237,7 +234,7 @@ module PagerDuty
         conn.use RaiseForbiddenOn403
         conn.use RaiseUnauthorizedOn401
 
-        conn.adapter  Faraday.default_adapter
+        conn.adapter Faraday.default_adapter
       end
     end
 
@@ -275,7 +272,7 @@ module PagerDuty
     private
 
     def faraday_v1?
-      faraday_version < Gem::Version.new("2") 
+      faraday_version < Gem::Version.new("2")
     end
 
     def faraday_version
@@ -283,7 +280,7 @@ module PagerDuty
     end
 
     def run_request(method, path, body: {}, headers: {}, query_params: {})
-      path = path.gsub(/^\//, '') # strip leading slash, to make sure relative things happen on the connection
+      path = path.gsub(/^\//, "") # strip leading slash, to make sure relative things happen on the connection
 
       connection.params = query_params
       response = connection.run_request(method, path, body, headers)

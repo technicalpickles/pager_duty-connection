@@ -1,20 +1,18 @@
-# -*- encoding: utf-8 -*-
-lib = File.expand_path('../lib', __FILE__)
+lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'pager_duty/connection/version'
+require "pager_duty/connection/version"
 
 Gem::Specification.new do |gem|
-  gem.name          = "pager_duty-connection"
-  gem.version       = PagerDuty::Connection::VERSION
-  gem.authors       = ["Josh Nichols"]
-  gem.email         = ["josh@technicalpickles.com"]
-  gem.description   = %q{Ruby API wrapper for the PagerDuty REST API}
-  gem.summary       = %q{Written with the power of faraday, pager_duty-connection tries to be a simple and usable Ruby API wrapper for the PagerDuty REST API}
-  gem.homepage      = "http://github.com/technicalpickles/pager_duty-connection"
+  gem.name = "pager_duty-connection"
+  gem.version = PagerDuty::Connection::VERSION
+  gem.authors = ["Josh Nichols"]
+  gem.email = ["josh@technicalpickles.com"]
+  gem.description = "Ruby API wrapper for the PagerDuty REST API"
+  gem.summary = "Written with the power of faraday, pager_duty-connection tries to be a simple and usable Ruby API wrapper for the PagerDuty REST API"
+  gem.homepage = "http://github.com/technicalpickles/pager_duty-connection"
 
-  gem.files         = `git ls-files`.split($/)
-  gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
-  gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
+  gem.files = `git ls-files`.split($/)
+  gem.executables = gem.files.grep(%r{^bin/}).map { |f| File.basename(f) }
   gem.require_paths = ["lib"]
 
   gem.add_dependency "faraday", ">= 1.10", "< 3"

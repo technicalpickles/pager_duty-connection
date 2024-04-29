@@ -31,7 +31,9 @@ And this is what it doesn't do:
 
 Add this line to your application's Gemfile:
 
-    gem 'pager_duty-connection'
+```ruby
+gem "pager_duty-connection"
+```
 
 And then execute:
 
@@ -54,22 +56,22 @@ pagerduty = PagerDuty::Connection.new(token)
 pagerduty = PagerDuty::Connection.new(token, token_type: :Bearer)
 
 # setup to use a custom domain
-pagerduty = PagerDuty::Connection.new(token, token_type: :Bearer, url: 'https://custom.domain.com')
+pagerduty = PagerDuty::Connection.new(token, token_type: :Bearer, url: "https://custom.domain.com")
 
 # 4 main methods: `get`, `post`, `put`, and `delete`:
 
-response = pagerduty.get('some/relative/path', params)
-response = pagerduty.post('some/relative/path', params)
-response = pagerduty.delete('some/relative/path', params)
-response = pagerduty.put('some/relative/path', params)
+response = pagerduty.get("some/relative/path", params)
+response = pagerduty.post("some/relative/path", params)
+response = pagerduty.delete("some/relative/path", params)
+response = pagerduty.put("some/relative/path", params)
 
 # use something like irb or pry to poke around the responses
 # the contents will vary a bit between call, ie:
 
-response = pagerduty.get('incidents')
+response = pagerduty.get("incidents")
 response.incidents # an array of incidents
 
-response = pagerduty.get('incidents/YYZ')
+response = pagerduty.get("incidents/YYZ")
 response # the hash/object that represents the array
 ```
 
@@ -102,14 +104,14 @@ In general, you can get/put/post/delete a path, with some attributes. Use the [R
 If you are working in Rails, and using only a single PagerDuty account, you'll probably want an initializer:
 
 ```ruby
-$pagerduty = PagerDuty::Connection.new('your-token')
+$pagerduty = PagerDuty::Connection.new("your-token")
 ```
 
 And if you are using [dotenv](https://github.com/bkeepers/dotenv), you can use environment variables, and stash them in .env:
 
 ```ruby
-account = ENV['PAGERDUTY_ACCOUNT'] || raise("Missing ENV['PAGERDUTY_ACCOUNT'], add to .env")
-token = ENV['PAGERDUTY_TOKEN'] || raise("Missing ENV['PAGERDUTY_TOKEN'], add to .env.#{Rails.env}")
+account = ENV["PAGERDUTY_ACCOUNT"] || raise("Missing ENV['PAGERDUTY_ACCOUNT'], add to .env")
+token = ENV["PAGERDUTY_TOKEN"] || raise("Missing ENV['PAGERDUTY_TOKEN'], add to .env.#{Rails.env}")
 $pagerduty = PagerDuty::Connection.new(account, token)
 ```
 
