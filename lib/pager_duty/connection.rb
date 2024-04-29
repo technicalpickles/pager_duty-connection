@@ -1,5 +1,5 @@
 require 'faraday'
-require 'faraday_middleware'
+require 'hashie'
 require 'active_support'
 require 'active_support/core_ext'
 require 'active_support/time_with_zone'
@@ -106,7 +106,7 @@ module PagerDuty
       end
     end
 
-    class ParseTimeStrings < Faraday::Response::Middleware
+    class ParseTimeStrings < Faraday::Middleware
       TIME_KEYS = %w(
         at
         created_at
@@ -136,6 +136,10 @@ module PagerDuty
         assigned_to
         pending_actions
       )
+
+      def on_complete(env)
+        parse(env[:body])
+      end
 
       def parse(body)
         case body
@@ -179,13 +183,34 @@ module PagerDuty
       end
     end
 
+    class Mashify < Faraday::Middleware
+      def on_complete(env)
+        env[:body] = parse(env[:body])
+      end
+
+      def parse(body)
+        case body
+        when Hash
+          ::Hashie::Mash.new(body)
+        when Array
+          body.map { |item| parse(item) }
+        else
+          body
+        end
+      end
+    end
+
     def initialize(token, token_type: :Token, url: API_PREFIX, debug: false)
       @connection = Faraday.new do |conn|
         conn.url_prefix = url
 
         case token_type
         when :Token
-          conn.request :token_auth, token
+          if faraday_v1?
+            conn.request :token_auth, token
+          else
+            conn.request :authorization, 'Token', token
+          end
         when :Bearer
           conn.request :authorization, 'Bearer', token
         else raise ArgumentError, "invalid token_type: #{token_type.inspect}"
@@ -199,7 +224,7 @@ module PagerDuty
 
         # json back, mashify it
         conn.use ParseTimeStrings
-        conn.response :mashify
+        conn.use Mashify
         conn.response :json
         conn.response :logger, ::Logger.new(STDOUT), bodies: true if debug
 
@@ -248,6 +273,14 @@ module PagerDuty
     end
 
     private
+
+    def faraday_v1?
+      faraday_version < Gem::Version.new("2") 
+    end
+
+    def faraday_version
+      @faraday_version ||= Gem.loaded_specs["faraday"].version
+    end
 
     def run_request(method, path, body: {}, headers: {}, query_params: {})
       path = path.gsub(/^\//, '') # strip leading slash, to make sure relative things happen on the connection
